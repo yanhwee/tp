@@ -26,6 +26,7 @@ import seedu.address.model.person.Email;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.Phone;
+import seedu.address.model.person.Remark;
 import seedu.address.model.tag.Tag;
 
 /**
@@ -138,6 +139,7 @@ public class EditCommand extends Command {
         private Email email;
         private Address address;
         private Set<Tag> tags;
+        private Remark remark;
 
         public EditPersonDescriptor() {}
 
@@ -151,6 +153,7 @@ public class EditCommand extends Command {
             setEmail(toCopy.email);
             setAddress(toCopy.address);
             setTags(toCopy.tags);
+            setRemark(toCopy.remark);
         }
 
         /**
@@ -164,9 +167,13 @@ public class EditCommand extends Command {
             this.name = name;
         }
 
+        public void setRemark(Remark remark) { this.remark = remark; }
+
         public Optional<Name> getName() {
             return Optional.ofNullable(name);
         }
+
+        public Optional<Remark> getRemark() { return Optional.ofNullable(remark); }
 
         public void setPhone(Phone phone) {
             this.phone = phone;
