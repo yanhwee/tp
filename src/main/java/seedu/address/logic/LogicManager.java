@@ -3,11 +3,19 @@ package seedu.address.logic;
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.Optional;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import javafx.collections.ObservableList;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.commons.core.LogsCenter;
+import seedu.address.logic.autocomplete.AutocompleteResult;
+import seedu.address.logic.autocomplete.TextCompletion;
+import seedu.address.logic.autocomplete.TextWithCursor;
+import seedu.address.logic.autocomplete.field.Field;
+import seedu.address.logic.autocomplete.fieldparser.MainFieldParser;
 import seedu.address.logic.commands.Command;
 import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.exceptions.CommandException;
@@ -91,5 +99,31 @@ public class LogicManager implements Logic {
     @Override
     public void setGuiSettings(GuiSettings guiSettings) {
         model.setGuiSettings(guiSettings);
+    }
+
+    @Override
+    public Optional<AutocompleteResult> autocomplete(String text, int cursor) {
+        String preText = text.substring(0, cursor);
+        String postText = text.substring(cursor);
+        Optional<Field> field = new MainFieldParser()
+                .parse(new TextWithCursor(preText, postText));
+        return field.map(f -> {
+            TextCompletion textCompletion = f.complete(model);
+            String completion = textCompletion.completion();
+            List<String> continuations = textCompletion.continuations();
+            String newPreText = preText + f.text().postText() + completion;
+            String newPostText = postText.substring(
+                    Integer.min(f.text().postText().length(), postText.length()));
+            int newCursor = newPreText.length();
+            String newText = newPreText + newPostText;
+            String completeText = f.text().fullText() + completion;
+            String display = continuations
+                    .stream()
+                    .map(s -> completeText + s)
+                    .collect(Collectors.joining(", "));
+            logger.info(String.format("HELLO: %s, %s, %s, %d",
+                    f.text().preText(), f.text().postText(), completion, newCursor));
+            return new AutocompleteResult(newText, newCursor, display);
+        });
     }
 }
